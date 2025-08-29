@@ -1,4 +1,3 @@
-# retriever/mappings.py
 INDEX_NAME = "rag_docs_v1"
 
 MAPPING = {

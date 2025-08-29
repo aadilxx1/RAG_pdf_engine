@@ -54,7 +54,7 @@ def search_documents(query: str, top_k: int = 5, mode: str = "hybrid"):
     # BM25 search
     bm25_resp = es.search(
         index=INDEX_NAME,
-        size=top_k*5,  # get more candidates for reranking
+        size=top_k*5,  
         query={"match": {"text": {"query": query}}}
     )
     for hit in bm25_resp["hits"]["hits"]:
@@ -87,12 +87,12 @@ def search_documents(query: str, top_k: int = 5, mode: str = "hybrid"):
             filtered_hits.append(h)
             seen_ids.add(cid)
 
-    # If nothing found
+    # If nothing is found
     if not filtered_hits:
         return []
 
     # --- Cross-encoder reranking ---
-    # Prepare pairs: (query, chunk text)
+    #Preparing pairs of(query, chunk text)
     pairs = [(query, h["_source"]["text"]) for h in filtered_hits]
     scores = reranker.predict(pairs)
 

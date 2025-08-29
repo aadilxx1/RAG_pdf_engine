@@ -2,12 +2,12 @@ import fitz  # PyMuPDF
 import re
 
 def clean_text(text: str) -> str:
-    # Remove URLs
+    #Removing URLs
     text = re.sub(r'http\S+', '', text)
-    # Remove reference-style numbers at start of lines or in parentheses
+    #Removing reference-style numbers at start of lines or in parentheses
     text = re.sub(r'\b\d+\b', '', text)
     text = re.sub(r'\(\d+\)', '', text)
-    # Remove extra whitespace and newlines
+    # Removng extra whitespace and newlines
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 

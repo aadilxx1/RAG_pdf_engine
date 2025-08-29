@@ -7,7 +7,7 @@ import re
 app = Flask(__name__)
 API_URL = "http://localhost:8000/query"
 
-# Load local LLM (can adjust model name) 
+# Load local LLM
 model_name = "MBZUAI/LaMini-Flan-T5-248M"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
@@ -29,15 +29,15 @@ def generate_answer(chunks, question, top_k=5, max_tokens=300):
     if not chunks:
         return "I don't know. No relevant information found."
 
-    # --- Guardrail: refuse unsafe or off-topic queries ---
+    # --- Guardrails ---
     unsafe_keywords = ["hack", "attack", "exploit", "illegal", "harm", "suicide", "kill"]
     if any(word in question.lower() for word in unsafe_keywords):
         return "Sorry, I cannot answer unsafe or harmful queries."
 
-    # Pick top-k relevant chunks
+    # Picking top-k relevant chunks
     top_chunks = chunks[:top_k]
 
-    # Build context and citations
+    # Building context and citations
     context = ""
     citations = []
     for c in top_chunks:
@@ -51,7 +51,7 @@ def generate_answer(chunks, question, top_k=5, max_tokens=300):
         else:
             citations.append(f"[{filename}: {chunk_id}]")
 
-    # Construct prompt with explicit grounding instruction
+    #Constructing Prompt
     prompt = f"""
 You are a helpful AI assistant. Answer the question ONLY using the context below.
 Do NOT make up information. If the answer is not in the context, say "I don't know".
@@ -65,7 +65,7 @@ Question:
 {question}
 """
 
-    # Tokenize and generate
+    #Tokenizing and generating answer
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
     output_ids = model.generate(
         inputs["input_ids"],
@@ -93,12 +93,12 @@ def index():
         retrieval_mode = request.form.get("retrieval_mode", "Hybrid")
 
         if query.strip():
-            # Call FastAPI to retrieve chunks
+            # Calling FastAPI to retrieve chunks
             response = requests.post(API_URL, json={"query": query, "top_k": 5})
             if response.status_code == 200:
                 data = response.json()
                 chunks = data.get("results", [])
-                # Generate final answer with LLM
+                #Generate final answer with LLM
                 answer = generate_answer(chunks, query)
             else:
                 answer = "Error: Could not fetch results from API."
