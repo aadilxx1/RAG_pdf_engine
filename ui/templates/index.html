@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RAG PDF Q&A</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background: #f9f9f9; 
+        }
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+        }
+        h1 { 
+            color: #333; 
+            text-align: center; 
+        }
+        form { 
+            margin-bottom: 30px; 
+            text-align: center; 
+        }
+        input[type=text] { 
+            width: 60%; 
+            padding: 8px; 
+            font-size: 14px; 
+            margin-right: 10px;
+        }
+        select { 
+            padding: 6px; 
+            font-size: 14px; 
+            margin-right: 10px;
+        }
+        button { 
+            padding: 8px 15px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            background-color: #007BFF; 
+            color: white; 
+            border: none; 
+            border-radius: 3px; 
+        }
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        h2 { 
+            color: #444; 
+            margin-top: 30px; 
+        }
+        ul { 
+            list-style-type: none; 
+            padding-left: 0; 
+        }
+        li { 
+            background: #fff; 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            border-radius: 4px; 
+            box-shadow: 0 0 3px rgba(0,0,0,0.1); 
+        }
+        a { 
+            color: #007BFF; 
+            text-decoration: none; 
+        }
+        a:hover { 
+            text-decoration: underline; 
+        }
+        .answer { 
+            background: #eaf7ea; 
+            padding: 15px; 
+            border-radius: 4px; 
+            box-shadow: 0 0 5px rgba(0,0,0,0.1); 
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>PDF Answer Engine</h1>
+
+    <form method="post">
+        <input type="text" name="query" value="{{ query }}" placeholder="Enter your question">
+        <select name="retrieval_mode">
+            <option value="ELSER-only" {% if retrieval_mode=="ELSER-only" %}selected{% endif %}>ELSER-only</option>
+            <option value="Hybrid" {% if retrieval_mode=="Hybrid" %}selected{% endif %}>Hybrid</option>
+        </select>
+        <button type="submit">Get Answer</button>
+    </form>
+
+    {% if chunks %}
+        <h2>Retrieved Chunks</h2>
+        <ul>
+        {% for c in chunks %}
+            <li>
+                <strong>{{ c.chunk_id }}</strong>: 
+                <span>{{ c.text[:200] }}{% if c.text|length > 200 %}...{% endif %}</span>
+                {% if c.drive_url %}
+                    <a href="{{ c.drive_url }}" target="_blank">[View PDF]</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if answer %}
+        <h2>Generated Answer</h2>
+        <div class="answer">{{ answer|safe }}</div>
+    {% endif %}
+</div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function() {
+    const button = this.querySelector('button');
+    button.disabled = true;
+    button.innerText = "Fetching answer...";
+});
+</script>
+</body>
+</html>
